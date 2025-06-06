@@ -35,14 +35,21 @@ servicemesh-demo/
 │   └── app2-deployment.yaml
 ├── istio/                 # Istio configurations
 │   └── gateway.yaml
+├── operators/             # Operator configurations
+│   └── grafana.yaml       # Grafana operator for Istio
+├── istio-grafana.yaml     # Istio installation with Grafana enabled
+├── istio-full.yaml        # Istio installation with all addons enabled
 ├── deploy.sh              # Deployment script
 ├── cleanup.sh             # Cleanup script
 ├── gke-setup.sh           # GKE deployment script
 ├── update-version.sh      # Version update and traffic splitting script
 ├── monitor.sh             # Monitoring dashboards script
+├── install-addons.sh      # Istio addons installation script
 ├── fault-injection.sh     # Fault injection script
 ├── circuit-breaker.sh     # Circuit breaker script
 ├── help.sh                # Help script with usage information
+├── port-forward.sh        # Port forwarding script for macOS users
+├── test-connectivity.sh   # Connectivity testing script
 ├── diagrams.md            # Architecture diagrams (Mermaid)
 └── README.md              # This file
 ```
@@ -56,7 +63,17 @@ servicemesh-demo/
 
 2. Install Istio:
    ```
+   # Default installation
    istioctl install --set profile=default -y
+   
+   # Or with Grafana enabled
+   istioctl install -f istio-grafana.yaml
+   
+   # Or with all addons and optimized configuration
+   istioctl install -f istio-full.yaml
+   
+   # Or install all observability addons after Istio is already installed
+   ./install-addons.sh
    ```
 
 3. Create and label the namespace:
@@ -145,6 +162,40 @@ After deployment, you can access the applications through the Istio Ingress Gate
 
 The deployment script will output the exact URLs.
 
+### macOS Connectivity Solution
+
+macOS users may experience connectivity issues when trying to access the Minikube cluster IP directly. The updated `deploy.sh` script now includes automatic port-forwarding to make the services accessible via localhost:
+
+- App1: `http://localhost:8080/app1`
+- App2: `http://localhost:8080/app2`
+
+If you've already deployed the services and need to set up port-forwarding separately, you can use:
+
+```
+./port-forward.sh
+```
+
+This script will:
+1. Set up port-forwarding from localhost:8080 to the Istio Ingress Gateway
+2. Keep running to maintain the port-forwarding (press Ctrl+C to stop)
+3. Show the original cluster IP URL for reference
+
+### Connectivity Testing
+
+To diagnose connectivity issues, you can use the connectivity testing script:
+
+```
+./test-connectivity.sh
+```
+
+This script will:
+1. Test pod-to-pod connectivity (service discovery)
+2. Test direct cluster IP connectivity
+3. Test localhost connectivity via port-forwarding
+4. Provide recommendations based on the test results
+
+This is particularly useful for macOS users to determine if they need to use the port-forwarding solution.
+
 ## Service Discovery
 
 App2 communicates with App1 using Kubernetes DNS-based service discovery. The service URL format is:
@@ -177,9 +228,19 @@ Istio provides several dashboards for monitoring and visualizing your service me
   istioctl dashboard jaeger
   ```
 
-- **Grafana**: Metrics visualization
+- **Grafana**: Metrics visualization (requires Grafana to be enabled)
   ```
+  # First ensure Grafana is enabled in your Istio installation
+  istioctl install -f istio-grafana.yaml
+  
+  # Then open the dashboard
   istioctl dashboard grafana
+  ```
+
+- **Installing All Addons**: For a complete observability setup
+  ```
+  # Install all observability addons at once
+  ./install-addons.sh
   ```
 
 ## Adapting for GKE

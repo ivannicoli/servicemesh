@@ -1,0 +1,101 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-control-plane
+  namespace: istio-system
+spec:
+  profile: default
+  # Enable all observability addons
+  addonComponents:
+    grafana:
+      enabled: true
+    kiali:
+      enabled: true
+    tracing:
+      enabled: true
+    prometheus:
+      enabled: true
+  # Configure mesh options
+  meshConfig:
+    # Enable access logging
+    accessLogFile: "/dev/stdout"
+    # Enable automatic sidecar injection
+    enableAutoMtls: true
+    # Configure default tracing
+    defaultConfig:
+      tracing:
+        sampling: 100.0
+  # Configure components
+  components:
+    # Configure Pilot (Istio control plane)
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2048Mi
+          limits:
+            cpu: 1000m
+            memory: 4096Mi
+    # Configure Ingress Gateway
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+    # Configure Egress Gateway
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+  # Global values
+  values:
+    # Enable global proxy settings
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+      # Configure proxy logs
+      proxy_init:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+    # Configure Grafana
+    grafana:
+      accessMode: ReadWriteMany
+    # Configure Kiali
+    kiali:
+      dashboard:
+        auth:
+          strategy: anonymous
+    # Configure Prometheus
+    prometheus:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi

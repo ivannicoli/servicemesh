@@ -92,6 +92,17 @@ case $DASHBOARD in
     echo "Opening Grafana dashboard..."
     echo "Grafana provides metrics visualization for your services."
     echo "You can see dashboards for service metrics, control plane metrics, and more."
+    
+    # Check if Grafana is enabled in the Istio installation
+    if ! kubectl get deployment -n istio-system grafana &> /dev/null; then
+      echo "Error: Grafana is not enabled in your Istio installation."
+      echo "To enable Grafana, reinstall Istio with Grafana enabled:"
+      echo "  istioctl install -f istio-grafana.yaml"
+      echo ""
+      echo "The istio-grafana.yaml file is provided in this project."
+      exit 1
+    fi
+    
     istioctl dashboard grafana
     ;;
   prometheus)
