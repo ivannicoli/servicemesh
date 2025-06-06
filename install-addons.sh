@@ -21,32 +21,17 @@ if ! kubectl get namespace istio-system &> /dev/null; then
   exit 1
 fi
 
-# Create a temporary IstioOperator file with all addons enabled
-TEMP_FILE=$(mktemp)
-cat > $TEMP_FILE << EOF
-apiVersion: install.istio.io/v1alpha1
-kind: IstioOperator
-metadata:
-  name: istio-control-plane
-  namespace: istio-system
-spec:
-  profile: default
-  addonComponents:
-    grafana:
-      enabled: true
-    kiali:
-      enabled: true
-    tracing:
-      enabled: true
-    prometheus:
-      enabled: true
-EOF
+echo "Installing Grafana addon..."
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/grafana.yaml
 
-echo "Installing Istio addons using IstioOperator..."
-istioctl install -f $TEMP_FILE -y
+echo "Installing Kiali addon..."
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/kiali.yaml
 
-# Clean up the temporary file
-rm $TEMP_FILE
+echo "Installing Jaeger addon..."
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/jaeger.yaml
+
+echo "Installing Prometheus addon..."
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.24/samples/addons/prometheus.yaml
 
 echo ""
 echo "===== Addon Installation Complete ====="

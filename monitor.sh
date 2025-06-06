@@ -95,11 +95,13 @@ case $DASHBOARD in
     
     # Check if Grafana is enabled in the Istio installation
     if ! kubectl get deployment -n istio-system grafana &> /dev/null; then
-      echo "Error: Grafana is not enabled in your Istio installation."
-      echo "To enable Grafana, reinstall Istio with Grafana enabled:"
-      echo "  istioctl install -f istio-grafana.yaml"
+      echo "Error: Grafana is not installed in your Istio system."
+      echo "To install Grafana, run one of the following commands:"
+      echo "  kubectl apply -f istio-grafana.yaml"
+      echo "  ./install-addons.sh"
+      echo "  kubectl apply -f istio-full.yaml"
       echo ""
-      echo "The istio-grafana.yaml file is provided in this project."
+      echo "These files are provided in this project."
       exit 1
     fi
     

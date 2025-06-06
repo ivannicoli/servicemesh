@@ -65,15 +65,18 @@ servicemesh-demo/
    ```
    # Default installation
    istioctl install --set profile=default -y
-   
-   # Or with Grafana enabled
-   istioctl install -f istio-grafana.yaml
-   
-   # Or with all addons and optimized configuration
-   istioctl install -f istio-full.yaml
-   
-   # Or install all observability addons after Istio is already installed
+   ```
+
+3. Install Istio addons (Grafana, Kiali, Jaeger, Prometheus):
+   ```
+   # Install all addons at once
    ./install-addons.sh
+   
+   # Or install Grafana only
+   kubectl apply -f istio-grafana.yaml
+   
+   # Or install all addons with one command
+   kubectl apply -f istio-full.yaml
    ```
 
 3. Create and label the namespace:
