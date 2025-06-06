@@ -1,0 +1,59 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: servicemesh-gateway
+  namespace: servicemesh-demo
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*" # Allow access from all hosts
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app1-virtualservice
+  namespace: servicemesh-demo
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - servicemesh-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /app1
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: app1
+        port:
+          number: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app2-virtualservice
+  namespace: servicemesh-demo
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - servicemesh-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /app2
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: app2
+        port:
+          number: 8080
